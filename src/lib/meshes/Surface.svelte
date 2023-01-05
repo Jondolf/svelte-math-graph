@@ -7,7 +7,7 @@
 	import * as THREE from 'three';
 
 	// Config
-	export let coordinateSystem: CoordinateSystem = CoordinateSystem.Spherical;
+	export let coordinateSystem: CoordinateSystem = CoordinateSystem.Cartesian;
 	export let equation = '';
 	export let xMin = -20;
 	export let xMax = 20;
