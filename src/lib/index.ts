@@ -9,10 +9,12 @@ import DirectionalLight from './lights/DirectionalLight.svelte';
 import Mesh from './meshes/Mesh.svelte';
 import Line from './meshes/Line.svelte';
 
+import CoordinateAxes from './meshes/CoordinateAxes.svelte';
 import Curve from './meshes/Curve.svelte';
 import Surface from './meshes/Surface.svelte';
 
 import { CoordinateSystem } from './coordinate-system';
+import ColorPicker from './ColorPicker.svelte';
 import type { Color, Point } from './types';
 
 export {
@@ -32,6 +34,7 @@ export {
 	Line,
 
 	// Math meshes
+	CoordinateAxes,
 	Curve,
 	Surface,
 
@@ -39,4 +42,5 @@ export {
 	CoordinateSystem,
 	Point,
 	Color,
+	ColorPicker,
 };
