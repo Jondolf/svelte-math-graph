@@ -10,6 +10,9 @@ import Mesh from './meshes/Mesh.svelte';
 import Line from './meshes/Line.svelte';
 
 import Curve from './meshes/Curve.svelte';
+import Surface from './meshes/Surface.svelte';
+
+import { CoordinateSystem } from './coordinate-system';
 import type { Color, Point } from './types';
 
 export {
@@ -30,7 +33,10 @@ export {
 
 	// Math meshes
 	Curve,
+	Surface,
+
 	// Miscallaneous
+	CoordinateSystem,
 	Point,
 	Color,
 };
