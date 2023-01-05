@@ -36,7 +36,7 @@
 			let y = evaluateMathExpression(evalFunction, { x, t: time });
 
 			if (!y || isNaN(y)) {
-				continue;
+				y = 0;
 			}
 
 			points.push([x, y, 0]);

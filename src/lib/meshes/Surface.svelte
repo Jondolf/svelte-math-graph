@@ -71,10 +71,10 @@
 		for (let i = 0; i < position.count; i++) {
 			let x = position.getX(i);
 			const y = position.getZ(i);
-			const z = evaluateMathExpression(evalFunction, { x, y, t: time });
+			let z = evaluateMathExpression(evalFunction, { x, y, t: time });
 
 			if (!z || isNaN(z)) {
-				continue;
+				z = 0;
 			}
 
 			position.setY(i, z);
@@ -96,7 +96,7 @@
 				let rho = evaluateMathExpression(evalFunction, { phi, theta, t: time });
 
 				if (!rho || isNaN(rho)) {
-					continue;
+					rho = 0;
 				}
 
 				const [x, y, z] = sphericalToCartesian(rho, phi, theta);
