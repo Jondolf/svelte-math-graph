@@ -8,12 +8,14 @@
 		DirectionalLight,
 		Graph,
 		OrbitCamera,
-		Surface
+		Surface,
+		DefinedRanges
 	} from '$lib';
 	import { onMount } from 'svelte';
 
-	export let equation: string = 'sin(16phi+t)';
+	export let equation: string = '1';
 
+	// 'sin(16phi+t)'
 	// weird spiral '1000sin(theta*phi+5t)'
 	// torus-like shape that warps into itself '1000sin(theta+t)'
 	// water droplet pattern 'sin((x^2+y^2)*((sin(t)+1)/20)+t/2)'
@@ -28,11 +30,11 @@
 
 	let meshDetail = 50;
 
-	let xRange = 20;
-	let yRange = 20;
+	let xRange = 10;
+	let yRange = 10;
 
-	let curveVisible = false;
-	let surfaceVisible = true;
+	let curveVisible = true;
+	let surfaceVisible = false;
 
 	onMount(() => requestAnimationFrame(animate));
 
@@ -93,36 +95,42 @@
 </div>
 
 <Graph width={graphWidth} height={graphHeight} {backgroundColor}>
-	<OrbitCamera aspect={graphWidth / graphHeight} far={100_000} position={[0, 0, 10]} />
-	<DirectionalLight intensity={1} position={[0.5, 0.1, 0.5]} />
-	<DirectionalLight intensity={1} position={[0.2, -0.1, 0.5]} />
+	<OrbitCamera aspect={graphWidth / graphHeight} far={100_000} position={[0, 10, 0]} />
+	<DirectionalLight intensity={1} position={[0.5, 0.5, 0.5]} />
+	<DirectionalLight intensity={1} position={[0.2, -0.5, 0.5]} />
 	<AmbientLight intensity={0.0} />
 
 	<CoordinateAxes />
 
 	{#if curveVisible}
 		<Curve
+			coordinateSystem={CoordinateSystem.Cartesian}
 			{equation}
-			{time}
-			segmentCount={meshDetail}
-			xMin={-xRange}
-			xMax={xRange}
-			yMin={-yRange}
-			yMax={yRange}
-			material={{ color: 0x000000 }}
+			variables={{
+				x: { ranges: new DefinedRanges([[-xRange, xRange]]) },
+				y: { ranges: new DefinedRanges([[-yRange, yRange]]) },
+				rho: { ranges: new DefinedRanges([[-10, 10]]) },
+				phi: {},
+				t: { value: time }
+			}}
+			detail={meshDetail}
+			material={{ color: surfaceColor }}
 		/>
 	{/if}
 	{#if surfaceVisible}
 		<Surface
-			coordinateSystem={CoordinateSystem.Spherical}
+			coordinateSystem={CoordinateSystem.Cartesian}
 			{equation}
-			{time}
-			xMin={-xRange}
-			xMax={xRange}
-			yMin={-yRange}
-			yMax={yRange}
-			xSegments={meshDetail}
-			ySegments={meshDetail}
+			variables={{
+				x: { ranges: new DefinedRanges([[-xRange, xRange]]) },
+				y: { ranges: new DefinedRanges([[-yRange, yRange]]) },
+				z: {},
+				rho: { ranges: new DefinedRanges([[-10, 10]]) },
+				phi: { ranges: new DefinedRanges([[0, 2 * Math.PI]]) },
+				theta: {},
+				t: { value: time }
+			}}
+			detail={meshDetail}
 			color={surfaceColor}
 		/>
 	{/if}

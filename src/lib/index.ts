@@ -14,8 +14,9 @@ import Curve from './meshes/Curve.svelte';
 import Surface from './meshes/Surface.svelte';
 
 import { CoordinateSystem } from './coordinate-system';
-import ColorPicker from './ColorPicker.svelte';
+import { DefinedRanges } from './math-variables';
 import type { Color, Point } from './types';
+import ColorPicker from './ColorPicker.svelte';
 
 export {
 	// Core components
@@ -40,7 +41,8 @@ export {
 
 	// Miscallaneous
 	CoordinateSystem,
+	DefinedRanges,
 	Point,
 	Color,
-	ColorPicker,
+	ColorPicker
 };

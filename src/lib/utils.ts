@@ -1,5 +1,5 @@
 import { compile } from 'mathjs';
-import type { EvalFunction, MathScope } from './types';
+import type { EvalFunction, MathScope, Variables } from './types';
 
 export function compileMathExpression(expression: string): EvalFunction | undefined {
   try {
@@ -15,6 +15,16 @@ export function evaluateMathExpression(evalFunction: EvalFunction, scope: MathSc
   } catch (_) {
     return;
   }
+}
+
+export function mathScopeFromVariables(variables: Variables): MathScope {
+  const scope: MathScope = {};
+
+  for (const [key, { value }] of Object.entries(variables)) {
+    scope[key] = value || 0;
+  }
+
+  return scope;
 }
 
 export function HSLToHex(h: number, s: number, l: number): string {
