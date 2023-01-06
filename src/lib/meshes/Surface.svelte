@@ -20,6 +20,7 @@
 	};
 	export let detail = 50;
 	export let color: Color = 0x4488ff;
+	export let opacity = 0.8;
 
 	// Variables
 	let axes = getAxes();
@@ -29,8 +30,9 @@
 	);
 	$: material = new THREE.MeshPhongMaterial({
 		color,
-		side: THREE.DoubleSide,
-		shadowSide: THREE.BackSide,
+		side: THREE.TwoPassDoubleSide,
+		transparent: true,
+		opacity,
 		flatShading: true
 	});
 	$: evalFunction = compileMathExpression(equation);

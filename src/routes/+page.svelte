@@ -25,6 +25,7 @@
 
 	let backgroundColor: string = '#000000';
 	let surfaceColor: string = '#0055ff';
+	let surfaceOpacity = 1;
 
 	let time = 0;
 
@@ -87,6 +88,19 @@
 
 	<br />
 
+	<label for="surfaceOpacity">surface opacity ({surfaceOpacity})</label>
+	<input
+		type="range"
+		name="surfaceOpacity"
+		id="surfaceOpacity"
+		min="0"
+		max="1"
+		step="0.1"
+		bind:value={surfaceOpacity}
+	/>
+
+	<br />
+
 	<span>background color</span>
 
 	<br />
@@ -132,6 +146,7 @@
 			}}
 			detail={meshDetail}
 			color={surfaceColor}
+			opacity={surfaceOpacity}
 		/>
 	{/if}
 </Graph>
