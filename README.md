@@ -14,17 +14,22 @@ Parsing mathematical expressions is done with [math.js](https://mathjs.org/). No
 
 **Note:** This library isn't on NPM yet, so you will have to clone it if you want to test it out.
 
-Below is the code required to render a 3D sine wave with custom colors. Implementing this manually with pure JavaScript and three.js could be hundreds of lines of code, but with SMG it is under ten.
+Below is the code required to render a 3D sine wave. First, we declare the required mathematical variables *x* and *y*, and restrict their values to be between -20 and 20. Then, we create the actual graph, and add a directional light and a camera. Finally, we create the `<Surface />` component, pass in the equation $sin(x)$ and the variables, and give it a blue color. The `<Surface />` component handles all of the complex math parsing and 3D rendering for you, assuming that the equation and the variables are valid.
 
 ```svelte
 <script>
-  import { DirectionalLight, Graph, PerspectiveCamera, Surface } from 'svelte-math-graph';
+  import { DefinedRanges, DirectionalLight, Graph, PerspectiveCamera, Surface } from 'svelte-math-graph';
+
+	const variables = {
+		x: { ranges: new DefinedRanges([[-20, 20]]) },
+		y: { ranges: new DefinedRanges([[-20, 20]]) }
+	};
 </script>
 
 <Graph backgroundColor={0xddeeff}>
 	<PerspectiveCamera position={[20, 50, 50]} lookAt={[0, 0, 0]} />
 	<DirectionalLight intensity={2} position={[0.75, 1, 0.75]} target={[0, 0, 0]} />
-	<Surface equation={'sin(x)'} xSegments={50} ySegments={50} color={0x0044ff} />
+	<Surface equation={'sin(x)'} {variables} color={0x0044ff} />
 </Graph>
 ```
 
