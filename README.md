@@ -24,7 +24,7 @@ Finally, we create the `<Surface />` component that handles all of the complex m
 
 ```svelte
 <script>
-	import { DefinedRanges, DirectionalLight, Graph, PerspectiveCamera, Surface } from 'svelte-math-graph';
+	import { DirectionalLight, Graph, PerspectiveCamera, Surface } from 'svelte-math-graph';
 	import { onMount } from 'svelte';
 
 	let time = 0;
