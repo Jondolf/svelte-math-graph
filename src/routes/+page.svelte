@@ -1,164 +1,122 @@
 <script lang="ts">
-	import {
-		AmbientLight,
-		ColorPicker,
-		CoordinateSystem,
-		CoordinateAxes,
-		Curve,
-		DirectionalLight,
-		Graph,
-		OrbitCamera,
-		Surface,
-		DefinedRanges
-	} from '$lib';
+	import { DirectionalLight, Graph, PerspectiveCamera, Surface } from '$lib';
 	import { onMount } from 'svelte';
 
-	export let equation: string = 'f(rho,phi)=sin(rho+t)*phi';
-
-	// 'sin(16phi+t)'
-	// weird spiral '1000sin(theta*phi+5t)'
-	// torus-like shape that warps into itself '1000sin(theta+t)'
-	// water droplet pattern 'sin((x^2+y^2)*((sin(t)+1)/20)+t/2)'
-
-	let graphWidth: number;
-	let graphHeight: number;
-
-	let backgroundColor: string = '#000000';
-	let surfaceColor: string = '#0055ff';
-	let surfaceOpacity = 1;
-
+	let windowWidth = 0;
+	let windowHeight = 0;
+	let headerWidth = 0;
+	let headerHeight = 0;
 	let time = 0;
 
-	let meshDetail = 50;
+	onMount(() => requestAnimationFrame(updateTime));
 
-	let xRange = 10;
-	let yRange = 10;
-
-	let curveVisible = true;
-	let surfaceVisible = false;
-
-	onMount(() => requestAnimationFrame(animate));
-
-	function animate() {
-		requestAnimationFrame(animate);
+	function updateTime() {
+		requestAnimationFrame(updateTime);
 		time = performance.now() / 1000;
 	}
 </script>
 
-<svelte:window bind:innerWidth={graphWidth} bind:innerHeight={graphHeight} />
-
-<div class="controls">
-	<label for="detail">detail ({meshDetail})</label>
-	<input
-		type="range"
-		name="detail"
-		id="detail"
-		min="2"
-		max="200"
-		step="1"
-		bind:value={meshDetail}
+<svelte:head>
+	<title>Svelte Math Graph</title>
+	<meta
+		name="description"
+		content="Svelte Math Graph (SMG) is a Svelte component library for creating mathematical graphs and visualizations with a declarative component-oriented API that focuses on ease of use, configurability, and extensibility."
 	/>
+</svelte:head>
 
-	<label for="xRange">x range (-{xRange}...{xRange})</label>
-	<input type="range" name="xRange" id="xRange" min="1" max="100" step="1" bind:value={xRange} />
+<svelte:window bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
 
-	<label for="yRange">y range (-{yRange}...{yRange})</label>
-	<input type="range" name="yRange" id="yRange" min="1" max="100" step="1" bind:value={yRange} />
+<header bind:clientWidth={headerWidth} bind:clientHeight={headerHeight}>
+	<div>
+		<h1>
+			<span>S</span>velte<br />
+			<span>M</span>ath<br />
+			<span>G</span>raph<br />
+		</h1>
+		<div class="description">
+			<p>
+				<strong>Svelte Math Graph (SMG)</strong> is a Svelte component library for creating mathematical
+				graphs and visualizations with a declarative component-oriented API that focuses on ease of use,
+				configurability, and extensibility.
+			</p>
+			<a href="/examples">See examples</a>
+		</div>
+	</div>
+</header>
 
-	<input type="checkbox" name="curveVisible" id="curveVisible" bind:checked={curveVisible} />
-	<label for="curveVisible">curve visible</label>
-
-	<br />
-
-	<input type="checkbox" name="surfaceVisible" id="surfaceVisible" bind:checked={surfaceVisible} />
-	<label for="surfaceVisible">surface visible</label>
-
-	<br />
-
-	<label for="equation">equation</label>
-	<input type="text" name="equation" id="equation" bind:value={equation} />
-
-	<br />
-
-	<span>surface color</span>
-
-	<br />
-
-	<ColorPicker bind:hex={surfaceColor} />
-
-	<br />
-
-	<label for="surfaceOpacity">surface opacity ({surfaceOpacity})</label>
-	<input
-		type="range"
-		name="surfaceOpacity"
-		id="surfaceOpacity"
-		min="0"
-		max="1"
-		step="0.1"
-		bind:value={surfaceOpacity}
+<Graph backgroundColor={0xffccbb} width={windowWidth} height={windowHeight - headerHeight}>
+	<PerspectiveCamera position={[30, 60, 60]} lookAt={[0, 0, 0]} />
+	<DirectionalLight intensity={2} position={[0.75, 1, 0.75]} target={[0, 0, 0]} />
+	<Surface
+		surfaceFunction={'f(x, y) = sin(x + 10t)'}
+		variables={{ t: { value: time } }}
+		color={0xff2222}
 	/>
-
-	<br />
-
-	<span>background color</span>
-
-	<br />
-
-	<ColorPicker bind:hex={backgroundColor} />
-</div>
-
-<Graph width={graphWidth} height={graphHeight} {backgroundColor}>
-	<OrbitCamera aspect={graphWidth / graphHeight} far={100_000} position={[0, 10, 0]} />
-	<DirectionalLight intensity={1} position={[0.5, 0.5, 0.5]} />
-	<DirectionalLight intensity={1} position={[0.2, -0.5, 0.5]} />
-	<AmbientLight intensity={0.0} />
-
-	<CoordinateAxes />
-
-	{#if curveVisible}
-		<Curve
-			coordinateSystem={CoordinateSystem.Polar}
-			curveFunction={equation}
-			variables={{ t: { value: time } }}
-			detail={meshDetail}
-			material={{ color: surfaceColor }}
-		/>
-	{/if}
-	{#if surfaceVisible}
-		<Surface
-			coordinateSystem={CoordinateSystem.Spherical}
-			surfaceFunction={equation}
-			variables={{ t: { value: time } }}
-			detail={meshDetail}
-			color={surfaceColor}
-			opacity={surfaceOpacity}
-		/>
-	{/if}
 </Graph>
 
 <style lang="scss">
 	:global(body) {
 		margin: 0;
+
+		::selection {
+			background-color: #ffaaaa;
+			color: black;
+		}
+	}
+
+	header {
+		width: 100%;
+		min-height: 20rem;
+		height: 40vh;
+		padding: 2rem;
+		box-sizing: border-box;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
 			Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+		box-shadow: 0 0 3rem #ffaaaa;
+
+		> div {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			gap: 2rem;
+		}
 	}
 
-	.controls {
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		padding: 1rem;
+	h1 {
+		height: 100%;
+		font-size: 4.25em;
+		margin: 0;
+		padding: 0;
+		color: black;
+
+		span {
+			color: #ff3e00;
+		}
+	}
+
+	.description {
+		max-width: 50rem;
+		height: 22rem;
+		padding-top: 2.5rem;
 		box-sizing: border-box;
-		color: white;
-		background-color: #00000055;
-	}
 
-	input[type='checkbox'] {
-		display: inline;
-	}
+		p {
+			color: black;
+			font-size: 1.5em;
+		}
 
-	input {
-		display: block;
+		a {
+			font-weight: bold;
+			font-size: 1.5em;
+			color: #ff3e00;
+			text-decoration: none;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
 	}
 </style>
