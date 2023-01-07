@@ -6,14 +6,16 @@
 
 	// Config
 	export let fov = 45;
-	export let aspect = 16 / 9;
+	export let aspect: number | undefined = undefined;
 	export let near = 1;
 	export let far = 1000;
 	export let position: Point = [0, 0, 0];
 	export let lookAt: Point | null = [0, 0, 0];
 
+	$: graphAspect = $graphWidth / $graphHeight;
+
 	// Variables
-	export let camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+	export let camera = new THREE.PerspectiveCamera(fov, aspect ?? graphAspect, near, far);
 
 	// Watchers
 	$: $graphWidth && $graphHeight && camera.updateProjectionMatrix();
@@ -22,7 +24,7 @@
 		camera.updateProjectionMatrix();
 	}
 	$: {
-		camera.aspect = aspect;
+		camera.aspect = aspect ?? graphAspect;
 		camera.updateProjectionMatrix();
 	}
 	$: {
