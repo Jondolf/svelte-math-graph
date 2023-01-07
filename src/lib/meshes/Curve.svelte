@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { CoordinateSystem, DefinedRanges, Line, type Point } from '$lib';
 	import { toCartesian } from '$lib/coordinate-system';
-	import type { EvalFunction, Variable, Variables } from '$lib/types';
+	import type { EvalFunction, Variables } from '$lib/types';
 	import {
 		compileMathExpression,
 		evaluateMathExpression,
@@ -45,14 +45,21 @@
 	$: if (coordinateSystem !== undefined && variables) {
 		axes = COORDINATE_SYSTEM_AXES[coordinateSystem];
 	}
-	$: coordinateSystem !== undefined &&
-		curveFunction &&
-		configuredVars &&
-		detail &&
-		updatePositions();
+	$: coordinateSystem !== undefined && curveFunction && detail && updatePositions();
+	// Only register variable changes if the function's expression contains any of the variables.
+	$: functionHasUserVars(variables) && updatePositions();
 
 	// Init
 	updatePositions();
+
+	/**
+	 * Checks if the function has any of the variables provided by the user.
+	 */
+	function functionHasUserVars(variables: Variables): boolean {
+		return Object.keys(variables).some((varName) =>
+			functionExpression.match(new RegExp(`[^A-Za-z]${varName}[^A-Za-z]`))
+		);
+	}
 
 	function updatePositions() {
 		if (!evalFunction) {

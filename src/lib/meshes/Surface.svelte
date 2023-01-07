@@ -59,11 +59,22 @@
 	$: if (coordinateSystem !== undefined && variables) {
 		axes = COORDINATE_SYSTEM_AXES[coordinateSystem];
 	}
-	$: coordinateSystem !== undefined && surfaceFunction && configuredVars && updatePositions(false);
+	$: coordinateSystem !== undefined && surfaceFunction && updatePositions(false);
+	// Only register variable changes if the function's expression contains any of the variables.
+	$: functionHasUserVars(variables) && updatePositions(false);
 	$: detail && updatePositions(true);
 
 	// Init
 	updatePositions(true);
+
+	/**
+	 * Checks if the function has any of the variables provided by the user.
+	 */
+	function functionHasUserVars(variables: Variables): boolean {
+		return Object.keys(variables).some((varName) =>
+			functionExpression.match(new RegExp(`[^A-Za-z]${varName}[^A-Za-z]`))
+		);
+	}
 
 	function updatePositions(rebuildGeometry: boolean) {
 		if (!evalFunction) {
