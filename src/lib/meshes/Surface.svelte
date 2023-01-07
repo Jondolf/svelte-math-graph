@@ -14,9 +14,9 @@
 
 	const DEFAULT_VAR_CONFIG: Variables = {
 		// Cartesian
-		x: { ranges: new DefinedRanges([[-10, 10]]) },
-		y: { ranges: new DefinedRanges([[-10, 10]]) },
-		z: { ranges: new DefinedRanges([[-10, 10]]) },
+		x: { ranges: new DefinedRanges([[-20, 20]]) },
+		y: { ranges: new DefinedRanges([[-20, 20]]) },
+		z: { ranges: new DefinedRanges([[-20, 20]]) },
 		// Spherical
 		rho: { ranges: new DefinedRanges([[0, 20]]) },
 		phi: { ranges: new DefinedRanges([[0, 2 * Math.PI]]) },
