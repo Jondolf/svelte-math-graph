@@ -14,35 +14,33 @@ Parsing mathematical expressions is done with [math.js](https://mathjs.org/). No
 
 **Note:** This library isn't on NPM yet, so you will have to clone it if you want to test it out.
 
-First, we declare the required mathematical variables that will be used in the equation, such as *x* and *y*. We restrict their values to be between -20 and 20 using the class `DefinedRanges` that indicates the ranges where a variable is defined. To animate the graph, we will also declare the variable *t* for time, and update it every frame using `requestAnimationFrame` and `performance.now`.
+To render a 3D surface we will use the `<Surface />` component. It takes in a mathematical function and variables as props. Note that variables like *x*, *y*, *z* etc. have a default configuration, so we don't have to manually declare them.
 
-Then, we create a graph, a camera, and a directional light. The `<Graph />` component is the main container for all other components, and it initializes the canvas and the renderer. The camera handles the actual rendering part. The light isn't required, but with the default materials, meshes wouldn't be visible without it.
+In order to animate the graph, we will create a variable called `time`, and update it every frame using `requestAnimationFrame` and `performance.now`. We will later pass in the time variable to `<Surface />` as *t*, and the graph will automatically update whenever `time` changes, thanks to Svelte's reactivity system.
 
-Finally, we create the `<Surface />` component that handles all of the complex math parsing and 3D mesh generation for you. We pass in the equation $\sin(x+10t)$ along with the previously defined variables, and give it a blue color.
+In the template of the file, we create a graph, a camera, and a directional light. The `<Graph />` component is the main container for all other components, and it initializes the canvas and the renderer. The camera handles the actual rendering part. The light makes sure the meshes are visible, as they would appear dark with the default materials.
+
+Finally, we create the `<Surface />` component that handles all of the complex math parsing and 3D mesh generation. We pass in the function $f(x, y) = \sin(x + 10t)$ along with the `time` variable, and give it a blue color.
 
 ```svelte
 <script>
 	import { DefinedRanges, DirectionalLight, Graph, PerspectiveCamera, Surface } from 'svelte-math-graph';
 	import { onMount } from 'svelte';
 
-	let variables = {
-		x: { ranges: new DefinedRanges([[-20, 20]]) },
-		y: { ranges: new DefinedRanges([[-20, 20]]) },
-		t: { value: 0 }
-	};
+	let time = 0;
 
 	onMount(() => requestAnimationFrame(updateTime));
 
 	function updateTime() {
 		requestAnimationFrame(updateTime);
-		variables.t.value = performance.now() / 1000;
+		time = performance.now() / 1000;
 	}
 </script>
 
 <Graph backgroundColor={0xddeeff}>
 	<PerspectiveCamera position={[20, 50, 50]} lookAt={[0, 0, 0]} />
 	<DirectionalLight intensity={2} position={[0.75, 1, 0.75]} target={[0, 0, 0]} />
-	<Surface equation={'sin(x+10t)'} {variables} color={0x0044ff} />
+	<Surface surfaceFunction={'f(x, y) = sin(x + 10t)'} variables={{ t: { value: time } }} color={0x0044ff} />
 </Graph>
 ```
 
