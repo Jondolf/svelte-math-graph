@@ -41,5 +41,11 @@
 	}
 </script>
 
-<canvas bind:this={canvas} />
+<canvas class="math-graph" bind:this={canvas} />
 <slot />
+
+<style lang="scss">
+	canvas {
+		vertical-align: top;
+	}
+</style>
