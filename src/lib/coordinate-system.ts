@@ -1,10 +1,10 @@
 import type { Point } from './types';
 
 export enum CoordinateSystem {
-  Cartesian,
-  Polar,
-  Spherical,
-  // Cylindrical
+  Cartesian = 'cartesian',
+  Polar = 'polar',
+  Spherical = 'spherical',
+  // Cylindrical = 'cylindrical'
 }
 
 /**

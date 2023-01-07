@@ -1,6 +1,21 @@
 import { compile } from 'mathjs';
 import type { EvalFunction, MathScope, Variables } from './types';
 
+export function getConfiguredVars(defaultVars: Variables, userVars: Variables): Variables {
+  const vars = defaultVars;
+  for (const [varName, varProperties] of Object.entries(userVars)) {
+    vars[varName] = varProperties;
+  }
+  return vars;
+}
+
+export function parseFunctionString(functionString: string): [string[], string] {
+  const [functionNotation, functionExpression] = functionString.split('=');
+  const vars = functionNotation.match(/\((?<vars>[A-Za-z, ]*)\)/)?.groups?.vars ?? '';
+  const varArr = vars.replaceAll(' ', '').split(',');
+  return [varArr.filter((str) => str !== '').sort(), functionExpression];
+}
+
 export function compileMathExpression(expression: string): EvalFunction | undefined {
   try {
     return compile(expression).evaluate;

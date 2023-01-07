@@ -13,7 +13,7 @@
 	} from '$lib';
 	import { onMount } from 'svelte';
 
-	export let equation: string = '1';
+	export let equation: string = 'f(rho,phi)=sin(rho+t)*phi';
 
 	// 'sin(16phi+t)'
 	// weird spiral '1000sin(theta*phi+5t)'
@@ -118,32 +118,18 @@
 
 	{#if curveVisible}
 		<Curve
-			coordinateSystem={CoordinateSystem.Cartesian}
-			{equation}
-			variables={{
-				x: { ranges: new DefinedRanges([[-xRange, xRange]]) },
-				y: { ranges: new DefinedRanges([[-yRange, yRange]]) },
-				rho: { ranges: new DefinedRanges([[-10, 10]]) },
-				phi: {},
-				t: { value: time }
-			}}
+			coordinateSystem={CoordinateSystem.Polar}
+			curveFunction={equation}
+			variables={{ t: { value: time } }}
 			detail={meshDetail}
 			material={{ color: surfaceColor }}
 		/>
 	{/if}
 	{#if surfaceVisible}
 		<Surface
-			coordinateSystem={CoordinateSystem.Cartesian}
-			{equation}
-			variables={{
-				x: { ranges: new DefinedRanges([[-xRange, xRange]]) },
-				y: { ranges: new DefinedRanges([[-yRange, yRange]]) },
-				z: {},
-				rho: { ranges: new DefinedRanges([[-10, 10]]) },
-				phi: { ranges: new DefinedRanges([[0, 2 * Math.PI]]) },
-				theta: {},
-				t: { value: time }
-			}}
+			coordinateSystem={CoordinateSystem.Spherical}
+			surfaceFunction={equation}
+			variables={{ t: { value: time } }}
 			detail={meshDetail}
 			color={surfaceColor}
 			opacity={surfaceOpacity}

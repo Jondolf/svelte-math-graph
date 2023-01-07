@@ -1,30 +1,46 @@
 <script lang="ts">
 	import { CoordinateSystem, DefinedRanges, Mesh, type Color } from '$lib';
 	import { toCartesian } from '$lib/coordinate-system';
-	import type { EvalFunction, Variable, Variables } from '$lib/types';
+	import type { EvalFunction, Point, Variables } from '$lib/types';
 	import {
 		compileMathExpression,
 		evaluateMathExpression,
-		mathScopeFromVariables
+		getConfiguredVars,
+		mathScopeFromVariables,
+		parseFunctionString
 	} from '$lib/utils';
 	import type { BufferGeometry } from 'three';
 	import * as THREE from 'three';
 
-	// Config
-	export let coordinateSystem: CoordinateSystem = CoordinateSystem.Cartesian;
-	export let equation = '';
-	export let variables: Variables = {
+	const DEFAULT_VAR_CONFIG: Variables = {
+		// Cartesian
 		x: { ranges: new DefinedRanges([[-10, 10]]) },
 		y: { ranges: new DefinedRanges([[-10, 10]]) },
-		z: {}
+		z: { ranges: new DefinedRanges([[-10, 10]]) },
+		// Spherical
+		rho: { ranges: new DefinedRanges([[0, 20]]) },
+		phi: { ranges: new DefinedRanges([[0, 2 * Math.PI]]) },
+		theta: { ranges: new DefinedRanges([[0, Math.PI]]) }
 	};
-	export let detail = 50;
+
+	const COORDINATE_SYSTEM_AXES: { [key in CoordinateSystem]: string[] } = {
+		cartesian: ['x', 'y', 'z'],
+		polar: [], // Not in 3D
+		spherical: ['rho', 'phi', 'theta']
+	};
+
+	// Config
+	export let coordinateSystem: CoordinateSystem = CoordinateSystem.Cartesian;
+	export let surfaceFunction = '';
+	export let variables: Variables = {}; // Variables defined by the user
+	export let detail = 100;
 	export let color: Color = 0x4488ff;
 	export let opacity = 0.8;
 
 	// Variables
-	let axes = getAxes();
-	let axisVars: (Variable | undefined)[] = axes.map((axis) => variables[axis]);
+	let [functionVars, functionExpression]: [string[], string] = parseFunctionString(surfaceFunction);
+	let configuredVars = getConfiguredVars(DEFAULT_VAR_CONFIG, variables);
+	let axes = COORDINATE_SYSTEM_AXES[coordinateSystem];
 	let geometry: BufferGeometry = new THREE.PlaneGeometry(1, 1, detail, detail).rotateX(
 		-Math.PI / 2
 	);
@@ -35,30 +51,19 @@
 		opacity,
 		flatShading: true
 	});
-	$: evalFunction = compileMathExpression(equation);
+	$: evalFunction = compileMathExpression(functionExpression);
 
 	// Watchers
-	$: coordinateSystem !== undefined && variables && updateAxes();
-	$: coordinateSystem !== undefined && equation && variables && updatePositions(false);
+	$: [functionVars, functionExpression] = parseFunctionString(surfaceFunction);
+	$: configuredVars = getConfiguredVars(DEFAULT_VAR_CONFIG, variables);
+	$: if (coordinateSystem !== undefined && variables) {
+		axes = COORDINATE_SYSTEM_AXES[coordinateSystem];
+	}
+	$: coordinateSystem !== undefined && surfaceFunction && configuredVars && updatePositions(false);
 	$: detail && updatePositions(true);
 
 	// Init
 	updatePositions(true);
-
-	function updateAxes() {
-		axisVars = axes.map((axis) => variables[axis]);
-		axes = getAxes();
-	}
-
-	function getAxes(): string[] {
-		switch (coordinateSystem) {
-			case CoordinateSystem.Cartesian:
-				return ['x', 'y', 'z'];
-			case CoordinateSystem.Spherical:
-				return ['rho', 'phi', 'theta'];
-		}
-		return [];
-	}
 
 	function updatePositions(rebuildGeometry: boolean) {
 		if (!evalFunction) {
@@ -75,41 +80,60 @@
 	}
 
 	function setPoints(geometry: THREE.BufferGeometry, evalFunction: EvalFunction) {
-		if (!axisVars[0] || !axisVars[1]) {
+		const var1 = configuredVars[functionVars[0]];
+		const var2 = configuredVars[functionVars[1]];
+
+		if (!var1 || !var2 || !axes.includes(functionVars[0]) || !axes.includes(functionVars[1])) {
 			return;
 		}
 
 		const position = geometry.attributes.position;
 
-		const var1Ranges = axisVars[0].ranges || new DefinedRanges();
-		const var2Ranges = axisVars[1].ranges || new DefinedRanges();
+		const var1Ranges = var1.ranges || new DefinedRanges();
+		const var2Ranges = var2.ranges || new DefinedRanges();
 
 		const deltaVar1 = (var1Ranges.max - var1Ranges.min) / (detail + 0.0000000001);
 		const deltaVar2 = (var2Ranges.max - var2Ranges.min) / (detail + 0.0000000001);
 
-		const scope = mathScopeFromVariables(variables);
+		const scope = mathScopeFromVariables(configuredVars);
 
 		let i = 0;
-		for (let var1 = var1Ranges.min; var1 <= var1Ranges.max; var1 += deltaVar1) {
-			for (let var2 = var2Ranges.min; var2 <= var2Ranges.max; var2 += deltaVar2) {
-				scope[axes[0]] = axisVars[0].value ?? var1;
-				scope[axes[1]] = axisVars[1].value ?? var2;
+		for (let val1 = var1Ranges.min; val1 <= var1Ranges.max; val1 += deltaVar1) {
+			for (let val2 = var2Ranges.min; val2 <= var2Ranges.max; val2 += deltaVar2) {
+				scope[functionVars[0]] = var1.value ?? val1;
+				scope[functionVars[1]] = var2.value ?? val2;
 
-				let var3 = evaluateMathExpression(evalFunction, scope);
+				let val3 = evaluateMathExpression(evalFunction, scope);
 
-				if (!var3 || isNaN(var3)) {
-					var3 = 0;
+				if (!val3 || isNaN(val3)) {
+					val3 = 0;
 				}
 
-				const [x, y, z] = toCartesian(coordinateSystem, [var1, var2, var3]);
+				const [x, y, z] = toCartesian(coordinateSystem, mapValuesToAxes(val1, val2, val3));
+
 				position.setX(i, x);
 				position.setY(i, z);
 				position.setZ(i, y);
+
 				i++;
 			}
 		}
 
 		return geometry;
+	}
+
+	function mapValuesToAxes(val1: number, val2: number, val3: number): [number, number, number] {
+		let axisValues: { [axis: string]: number } = {};
+		axes.forEach((axis) => (axisValues[axis] = NaN));
+		axisValues[functionVars[0]] = val1;
+		axisValues[functionVars[1]] = val2;
+		const remaining = Object.entries(axisValues).find(([_, axisVal]) => isNaN(axisVal))?.[0];
+
+		if (remaining) {
+			axisValues[remaining] = val3;
+		}
+
+		return axes.map((axis) => axisValues[axis]) as Point;
 	}
 </script>
 
